@@ -26,32 +26,52 @@ METRIC = "euclidean";
 
 % To test parameters
 FEATURE_COLOURS = ["grayscale", "rgb"];
-STEPS = 1:5:50;
+STEPS = 5:5:50;
 BIN_SIZES = 8.^(0:2);
 VOCAB_SIZES = 50:50:200;
 LAYERS = [1, 2, 3];
 Ks = 1:2:15;
-LAMBDAS = 10.^(-5:5);
+LAMBDAS = 10.^(-5:2);
 
 best_accuracy = 0;
-parameters = cell(6, 2);
-cell{1, 1} = "FEATURE_COLOUR_TYPE";
-cell{2, 1} = "STEP";
-cell{3, 1} = "BIN_SIZE";
-cell{4, 1} = "VOCAB_SIZE";
-cell{5, 1} = "LAYERS";
+best_parameters = cell(6, 2);
+best_parameters{1, 1} = "FEATURE_COLOUR_TYPE";
+best_parameters{2, 1} = "STEP";
+best_parameters{3, 1} = "BIN_SIZE";
+best_parameters{4, 1} = "VOCAB_SIZE";
+best_parameters{5, 1} = "LAYERS";
 switch CLASSIFIER
     case "nearest neighbor"
-        cell{6, 1} = "K";
+        best_parameters{6, 1} = "K";
     case "support vector machine"
-        cell{6, 1} = "LAMBDA";
+        best_parameters{6, 1} = "LAMBDA";
 end
 
-cell{1, 2} = FEATURE_COLOURS(1);
-cell{2, 2} = STEPS(1);
-cell{3, 2} = BIN_SIZES(1);
-cell{4, 2} = VOCAB_SIZES(1);
-cell{5, 2} = LAYERS(1);
+best_parameters{1, 2} = FEATURE_COLOURS(1);
+best_parameters{2, 2} = STEPS(1);
+best_parameters{3, 2} = BIN_SIZES(1);
+best_parameters{4, 2} = VOCAB_SIZES(1);
+best_parameters{5, 2} = LAYERS(1);
+
+worst_accuracy = 100;
+worst_parameters = cell(6, 2);
+worst_parameters{1, 1} = "FEATURE_COLOUR_TYPE";
+worst_parameters{2, 1} = "STEP";
+worst_parameters{3, 1} = "BIN_SIZE";
+worst_parameters{4, 1} = "VOCAB_SIZE";
+worst_parameters{5, 1} = "LAYERS";
+switch CLASSIFIER
+    case "nearest neighbor"
+        worst_parameters{6, 1} = "K";
+    case "support vector machine"
+        worst_parameters{6, 1} = "LAMBDA";
+end
+
+worst_parameters{1, 2} = FEATURE_COLOURS(1);
+worst_parameters{2, 2} = STEPS(1);
+worst_parameters{3, 2} = BIN_SIZES(1);
+worst_parameters{4, 2} = VOCAB_SIZES(1);
+worst_parameters{5, 2} = LAYERS(1);
 
 % Set up paths to VLFeat functions. 
 % See http://www.vlfeat.org/matlab/matlab.html for VLFeat Matlab documentation
@@ -175,12 +195,20 @@ for fc = 1:length(FEATURE_COLOURS)
                                     predicted_categories)
                             if accuracy > best_accuracy
                                 best_accuracy = accuracy;
-                                cell{1, 2} = FEATURE_COLOUR_TYPE;
-                                cell{2, 2} = STEP;
-                                cell{3, 2} = BIN_SIZE;
-                                cell{4, 2} = vocab_size;
-                                cell{5, 2} = NUM_LAYERS;
-                                cell{6, 2} = K;
+                                best_parameters{1, 2} = FEATURE_COLOUR_TYPE;
+                                best_parameters{2, 2} = STEP;
+                                best_parameters{3, 2} = BIN_SIZE;
+                                best_parameters{4, 2} = vocab_size;
+                                best_parameters{5, 2} = NUM_LAYERS;
+                                best_parameters{6, 2} = K;
+                            elseif accuracy < worst_accuracy
+                                worst_accuracy = accuracy;
+                                worst_parameters{1, 2} = FEATURE_COLOUR_TYPE;
+                                worst_parameters{2, 2} = STEP;
+                                worst_parameters{3, 2} = BIN_SIZE;
+                                worst_parameters{4, 2} = vocab_size;
+                                worst_parameters{5, 2} = NUM_LAYERS;
+                                worst_parameters{6, 2} = K;
                             end
                         end
                     case 'support vector machine'
@@ -197,12 +225,21 @@ for fc = 1:length(FEATURE_COLOURS)
                                     predicted_categories)
                             if accuracy > best_accuracy
                                 best_accuracy = accuracy;
-                                cell{1, 2} = FEATURE_COLOUR_TYPE;
-                                cell{2, 2} = STEP;
-                                cell{3, 2} = BIN_SIZE;
-                                cell{4, 2} = vocab_size;
-                                cell{5, 2} = NUM_LAYERS;
-                                cell{6, 2} = LAMBDA;
+                                best_parameters{1, 2} = FEATURE_COLOUR_TYPE;
+                                best_parameters{2, 2} = STEP;
+                                best_parameters{3, 2} = BIN_SIZE;
+                                best_parameters{4, 2} = vocab_size;
+                                best_parameters{5, 2} = NUM_LAYERS;
+                                best_parameters{6, 2} = LAMBDA;
+                            end
+                            if accuracy < worst_accuracy
+                                worst_accuracy = accuracy;
+                                worst_parameters{1, 2} = FEATURE_COLOUR_TYPE;
+                                worst_parameters{2, 2} = STEP;
+                                worst_parameters{3, 2} = BIN_SIZE;
+                                worst_parameters{4, 2} = vocab_size;
+                                worst_parameters{5, 2} = NUM_LAYERS;
+                                worst_parameters{6, 2} = LAMBDA;
                             end
                         end
                 end
