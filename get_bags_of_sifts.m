@@ -2,7 +2,7 @@
 % University 
 % Michal Mackiewicz, UEA
 
-function image_feats = get_bags_of_sifts(image_paths, step, bin_size, colour_type)
+function image_feats = get_bags_of_sifts(image_paths, vocab_size, step, bin_size, colour_type)
 % image_paths is an N x 1 cell array of strings where each string is an
 % image path on the file system.
 
@@ -50,7 +50,6 @@ D = vl_alldist2(X,Y)
 %}
 load('vocab.mat');
 vocab = vocab';
-vocab_size = size(vocab, 2);
 image_feats = zeros(length(image_paths), vocab_size);
 switch colour_type
     case "grayscale"
@@ -80,18 +79,36 @@ switch colour_type
                 [rgb, ~] = gray2ind(img,256);
                 img = cat(3,rgb, rgb, rgb);
             end
-            R_SIFT_features = vl_dsift(single(img(:,:,1)), 'fast', 'step', step, 'size', bin_size);
-            G_SIFT_features = vl_dsift(single(img(:,:,2)), 'fast', 'step', step, 'size', bin_size);
-            B_SIFT_features = vl_dsift(single(img(:,:,3)), 'fast', 'step', step, 'size', bin_size);
-            R_distance = vl_alldist2(R_SIFT_features, vocab);
-            G_distance = vl_alldist2(G_SIFT_features, vocab);
-            B_distance = vl_alldist2(B_SIFT_features, vocab);
-            R_hist = create_sift_histogram(R_distance, vocab_size);
-            G_hist = create_sift_histogram(G_distance, vocab_size);
-            B_hist = create_sift_histogram(B_distance, vocab_size);
-            RG_hist = min(R_hist, G_hist);
-            RGB_hist = min(RG_hist, B_hist);
-            image_feats(i, :) = RGB_hist;
+%             R = img(:, :, 1); 
+%             G = img(:, :, 2);
+%             B = img(:, :, 3);
+%             norm_R = R ./ (R + G + B);
+%             norm_G = G ./ (R + G + B);
+%             norm_B = B ./ (R + G + B);
+            [~, R_SIFT_features] = vl_dsift(single(img(:,:,1)), 'fast', 'step', step, 'size', bin_size);
+            [~, G_SIFT_features] = vl_dsift(single(img(:,:,2)), 'fast', 'step', step, 'size', bin_size);
+            [~, B_SIFT_features] = vl_dsift(single(img(:,:,3)), 'fast', 'step', step, 'size', bin_size);
+            SIFT_features = [R_SIFT_features; G_SIFT_features; B_SIFT_features];
+            % Get the distances between each SIFT feature and vocab. 
+            % Returns a S x K matrix of distances where 
+            % S = Number of columns in SIFT_features
+            % K = Number of columns in vocab
+            distance = vl_alldist2(single(SIFT_features), vocab);
+            histogram = create_sift_histogram(distance, vocab_size);
+            % Normalise the histogram and store into matrix
+            image_feats(i, :) = histogram / sum(histogram); 
+        end
+    case "rgb_phow"
+        parfor i = 1:length(image_paths)
+            img = imread(image_paths{i});
+            if size(img, 3) == 1
+                [rgb, ~] = gray2ind(img,256);
+                img = cat(3,rgb, rgb, rgb);
+            end
+            [~, SIFT_features] = vl_phow(single(img), 'step', step, 'sizes', bin_size, 'color', 'rgb');
+            distance = vl_alldist2(single(SIFT_features), vocab);
+            histogram = create_sift_histogram(distance, vocab_size);
+            image_feats(i, :) = histogram / sum(histogram);
         end
 end
 

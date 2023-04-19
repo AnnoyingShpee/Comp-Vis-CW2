@@ -56,7 +56,7 @@ Useful functions:
 features = [];
 switch colour_type
     case "grayscale"
-        for i = 1:length(image_paths)
+        parfor i = 1:length(image_paths)
             img = imread(image_paths{i});
             % vl_dsift only accepts images that are of class SINGLE and grayscale.
             % Hence, image must be checked if it is colour to become grayscale.
@@ -64,7 +64,7 @@ switch colour_type
             if size(img, 3) > 1
                 img = rgb2gray(img);
             end
-            [~, SIFT_features] = vl_dsift(single(img), 'fast', 'step', step);
+            [~, SIFT_features] = vl_dsift(single(img), 'fast', 'step', step, 'size', bin_size);
             % Add SIFT to array of features
             features = [features, SIFT_features];
         end
@@ -75,10 +75,20 @@ switch colour_type
                 [rgb, ~] = gray2ind(img,256);
                 img = cat(3,rgb, rgb, rgb);
             end
-            [~, R_SIFT_features] = vl_dsift(single(img(:,:,1)), 'fast', 'step', step);
-            [~, G_SIFT_features] = vl_dsift(single(img(:,:,2)), 'fast', 'step', step);
-            [~, B_SIFT_features] = vl_dsift(single(img(:,:,3)), 'fast', 'step', step);
-            SIFT_features = (R_SIFT_features + G_SIFT_features + B_SIFT_features) / 3;
+            [~, R_SIFT_features] = vl_dsift(single(img(:,:,1)), 'fast', 'step', step, 'size', bin_size);
+            [~, G_SIFT_features] = vl_dsift(single(img(:,:,2)), 'fast', 'step', step, 'size', bin_size);
+            [~, B_SIFT_features] = vl_dsift(single(img(:,:,3)), 'fast', 'step', step, 'size', bin_size);
+            SIFT_features = [R_SIFT_features; G_SIFT_features; B_SIFT_features];
+            features = [features, SIFT_features];
+        end
+    case "rgb_phow"
+        parfor i = 1:length(image_paths)
+            img = imread(image_paths{i});
+            if size(img, 3) == 1
+                [rgb, ~] = gray2ind(img,256);
+                img = cat(3,rgb, rgb, rgb);
+            end
+            [~, SIFT_features] = vl_phow(single(img),'step', step, 'sizes', bin_size, 'color', 'rgb');
             features = [features, SIFT_features];
         end
 end
