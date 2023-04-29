@@ -70,7 +70,7 @@ switch colour_type
             distance = vl_alldist2(SIFT_features, vocab);
             histogram = create_sift_histogram(distance, vocab_size);
             % Normalise the histogram and store into matrix
-            image_feats(i, :) = histogram / sum(histogram); 
+            image_feats(i, :) = histogram / sum(histogram);
         end
     case "rgb"
         parfor i = 1:length(image_paths)
@@ -79,12 +79,6 @@ switch colour_type
                 [rgb, ~] = gray2ind(img,256);
                 img = cat(3,rgb, rgb, rgb);
             end
-%             R = img(:, :, 1); 
-%             G = img(:, :, 2);
-%             B = img(:, :, 3);
-%             norm_R = R ./ (R + G + B);
-%             norm_G = G ./ (R + G + B);
-%             norm_B = B ./ (R + G + B);
             [~, R_SIFT_features] = vl_dsift(single(img(:,:,1)), 'fast', 'step', step, 'size', bin_size);
             [~, G_SIFT_features] = vl_dsift(single(img(:,:,2)), 'fast', 'step', step, 'size', bin_size);
             [~, B_SIFT_features] = vl_dsift(single(img(:,:,3)), 'fast', 'step', step, 'size', bin_size);

@@ -7,14 +7,11 @@ tic
 % FEATURE = 'colour histogram';
 % FEATURE = 'bag of sift';
 FEATURE = 'spatial pyramids';
+% FEATURE = "none";
 
 % CLASSIFIER = 'nearest neighbor';
 CLASSIFIER = 'support vector machine';
 
-% QUANTISATION = 16; % 8, 16, 32, 64
-% COLOUR_SPACE = "rgb";
-% IMG_SIZE = 16; % 8, 16, 32, 64
-% K = 5;
 METRIC = "euclidean";
 
 % To test parameters
@@ -22,9 +19,9 @@ FEATURE_COLOUR = "grayscale"; % grayscale, rgb, rgb_phow
 STEP = 4;
 % % Note: Default value of size in vl_dsift is 3
 BIN_SIZE = 4;
-vocab_size = 100;
+vocab_size = 300;
 NUM_LAYERS = 3;
-K = 1;
+K = 11;
 LAMBDA = 0.00001; % 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10
 
 % Set up paths to VLFeat functions. 
@@ -95,30 +92,27 @@ switch lower(FEATURE)
         test_image_feats  = get_colour_histograms(test_image_paths, QUANTISATION, COLOUR_SPACE);
      case 'bag of sift'
         % YOU CODE build_vocabulary.m
-%         if ~exist('vocab.mat', 'file')
-%             fprintf('No existing dictionary found. Computing one from training images\n')
-%             vocab_size = 50; % you need to test the influence of this parameter
-%             vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR_TYPE); %Also allow for different sift parameters
-%             save('vocab.mat', 'vocab');
-%         end
-        fprintf('No existing dictionary found. Computing one from training images\n')
-        vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Also allow for different sift parameters
-        save('vocab.mat', 'vocab');
+        if ~exist('vocab.mat', 'file')
+            fprintf('No existing dictionary found. Computing one from training images\n')
+            vocab_size = 50; % you need to test the influence of this parameter
+            vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR_TYPE); %Also allow for different sift parameters
+            save('vocab.mat', 'vocab');
+        end
         % YOU CODE get_bags_of_sifts.m
-%         if ~exist('image_feats.mat', 'file')
-%             train_image_feats = get_bags_of_sifts(train_image_paths, STEP, BIN_SIZE, FEATURE_COLOUR); %Allow for different sift parameters
-%             test_image_feats  = get_bags_of_sifts(test_image_paths, STEP, BIN_SIZE, FEATURE_COLOUR); 
-%             save('image_feats.mat', 'train_image_feats', 'test_image_feats')
-%         end
+        if ~exist('image_feats.mat', 'file')
+            train_image_feats = get_bags_of_sifts(train_image_paths, STEP, BIN_SIZE, FEATURE_COLOUR); %Allow for different sift parameters
+            test_image_feats  = get_bags_of_sifts(test_image_paths, STEP, BIN_SIZE, FEATURE_COLOUR); 
+            save('image_feats.mat', 'train_image_feats', 'test_image_feats')
+        end
         train_image_feats = get_bags_of_sifts(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Allow for different sift parameters
         test_image_feats  = get_bags_of_sifts(test_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); 
         save('image_feats.mat', 'train_image_feats', 'test_image_feats')
       case 'spatial pyramids'
-%           if ~exist('vocab.mat', 'file')
-%             fprintf('No existing dictionary found. Computing one from training images\n')
-%             vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Also allow for different sift parameters
-%             save('vocab.mat', 'vocab');
-%           end
+          if ~exist('vocab.mat', 'file')
+            fprintf('No existing dictionary found. Computing one from training images\n')
+            vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Also allow for different sift parameters
+            save('vocab.mat', 'vocab');
+          end
             fprintf('No existing dictionary found. Computing one from training images\n')
             vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Also allow for different sift parameters
             save('vocab.mat', 'vocab');

@@ -147,6 +147,13 @@ for i = 1:num_categories
     false_positives  = test_image_paths(false_positive_inds);  
     false_positive_labels = test_labels(false_positive_inds);
     
+%     %True negatives. There might not be enough of them if the classifier is
+%     %good
+%     true_negative_inds = ~strcmp(categories{i}, test_labels) & ...
+%                            ~strcmp(categories{i}, predicted_categories);
+%     true_negatives = test_image_paths(true_negative_inds);
+%     true_negative_labels = test_labels(true_negative_inds);
+
     %False negatives. There might not be enough of them if the classifier
     %is good
     false_negative_inds = strcmp(categories{i}, test_labels) & ...

@@ -49,22 +49,21 @@ for L = 0:num_layers-1
                     [~, B_SIFT_features] = vl_dsift(cell(:,:,3), 'fast', 'step', step, 'size', bin_size);
                     SIFT_features = [R_SIFT_features; G_SIFT_features; B_SIFT_features];
                     distance = vl_alldist2(single(SIFT_features), vocab);
-                    hist = create_sift_histogram(distance, vocab_size);
-                    hists = [hists, hist];
+                    SIFT_hist = create_sift_histogram(distance, vocab_size);
+                    hists = [hists, SIFT_hist];
                 case "rgb_phow"
                     cell = img(row_indices(r):row_end, col_indices(c):col_end, :);
                     [~, SIFT_features] = vl_phow(cell, 'step', step, 'sizes', bin_size, 'color', 'rgb');
                     distance = vl_alldist2(single(SIFT_features), vocab);
-                    histogram = create_sift_histogram(distance, vocab_size);
-                    histogram = histogram / sum(histogram);
-                    hists = [hists, histogram];
+                    SIFT_hist = create_sift_histogram(distance, vocab_size);
+                    hists = [hists, SIFT_hist];
             end
         end
     end
     % Weight the pyramid layer and concatenate to feature
     % vector
     layers = [layers, hists * kernel_weight];
-%                 layer = [layer, hists];
+%     layers = layers / sum(layers);
 end
 
 end
