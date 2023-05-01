@@ -5,8 +5,8 @@ tic
 %% Step 0: Set up parameters, vlfeat, category list, and image paths.
 % FEATURE = 'tiny image';
 % FEATURE = 'colour histogram';
-FEATURE = 'bag of sift';
-% FEATURE = 'spatial pyramids';
+% FEATURE = 'bag of sift';
+FEATURE = 'spatial pyramids';
 % FEATURE = "none";
 
 % CLASSIFIER = 'nearest neighbor';
@@ -18,7 +18,7 @@ METRIC = "euclidean";
 FEATURE_COLOUR = "grayscale"; % grayscale, rgb, rgb_phow
 STEP = 4;
 % % Note: Default value of size in vl_dsift is 3
-BIN_SIZE = 6;
+BIN_SIZE = 4;
 vocab_size = 300;
 NUM_LAYERS = 3;
 K = 11;
@@ -101,27 +101,24 @@ switch lower(FEATURE)
         end
         % YOU CODE get_bags_of_sifts.m
         if ~exist('image_feats.mat', 'file')
-            train_image_feats = get_bags_of_sifts(train_image_paths, STEP, BIN_SIZE, FEATURE_COLOUR); %Allow for different sift parameters
-            test_image_feats  = get_bags_of_sifts(test_image_paths, STEP, BIN_SIZE, FEATURE_COLOUR); 
+            train_image_feats = get_bags_of_sifts(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Allow for different sift parameters
+            test_image_feats  = get_bags_of_sifts(test_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); 
             save('image_feats.mat', 'train_image_feats', 'test_image_feats')
         end
-        train_image_feats = get_bags_of_sifts(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Allow for different sift parameters
-        test_image_feats  = get_bags_of_sifts(test_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); 
-        save('image_feats.mat', 'train_image_feats', 'test_image_feats')
 
       case 'spatial pyramids'
-          if ~exist('vocab.mat', 'file')
+        if ~exist('vocab.mat', 'file')
             fprintf('No existing dictionary found. Computing one from training images\n')
             vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Also allow for different sift parameters
             save('vocab.mat', 'vocab');
-          end
-            fprintf('No existing dictionary found. Computing one from training images\n')
-            vocab = build_vocabulary(train_image_paths, vocab_size, STEP, BIN_SIZE, FEATURE_COLOUR); %Also allow for different sift parameters
-            save('vocab.mat', 'vocab');
-            % YOU CODE spatial pyramids method
+        end
+        % YOU CODE spatial pyramids method
+        if ~exist('image_feats.mat', 'file')
             train_image_feats = get_spatial_pyramids(train_image_paths, vocab_size, NUM_LAYERS, STEP, BIN_SIZE, FEATURE_COLOUR);
             test_image_feats = get_spatial_pyramids(test_image_paths, vocab_size, NUM_LAYERS, STEP, BIN_SIZE, FEATURE_COLOUR);
             save('image_feats.mat', 'train_image_feats', 'test_image_feats')
+        end
+        
 end
 %% Step 2: Classify each test image by training and using the appropriate classifier
 % Each function to classify test features will return an N x 1 cell array,
